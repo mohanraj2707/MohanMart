@@ -10,3 +10,4 @@ db.pool.connectionTimeout=20000
 db.pool.maxLifetime=1800000
 app.session.timeout=30
 ai.chatbot.provider=mock
+ai.chatbot.model=gemini-3.1-flash-lite

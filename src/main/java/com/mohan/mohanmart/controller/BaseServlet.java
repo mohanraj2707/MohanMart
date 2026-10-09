@@ -83,9 +83,15 @@ public abstract class BaseServlet extends HttpServlet {
         } else if (e instanceof ResourceNotFoundException) {
             statusCode = HttpServletResponse.SC_NOT_FOUND; // 404
             errorCode = ((ResourceNotFoundException) e).getErrorCode() != null ? ((ResourceNotFoundException) e).getErrorCode() : "NOT_FOUND";
+        } else if (e instanceof RateLimitException) {
+            statusCode = 429; // Too Many Requests
+            errorCode = ((RateLimitException) e).getErrorCode() != null ? ((RateLimitException) e).getErrorCode() : "RATE_LIMIT_EXCEEDED";
         } else if (e instanceof InsufficientStockException) {
             statusCode = HttpServletResponse.SC_CONFLICT; // 409
             errorCode = "INSUFFICIENT_STOCK";
+        } else if (e instanceof ConflictException) {
+            statusCode = HttpServletResponse.SC_CONFLICT; // 409
+            errorCode = ((ConflictException) e).getErrorCode() != null ? ((ConflictException) e).getErrorCode() : "CONFLICT";
         } else if (e instanceof OrderException) {
             statusCode = HttpServletResponse.SC_BAD_REQUEST; // 400
             errorCode = ((OrderException) e).getErrorCode() != null ? ((OrderException) e).getErrorCode() : "ORDER_ERROR";
