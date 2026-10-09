@@ -10,11 +10,16 @@ buildNumber.properties
 .mvn/timing.properties
 .mvn/.develocity/
 
-# Compiled class files
+# Compiled class files & Runtime Artifacts
 *.class
 *.war
 *.ear
 *.nar
+tomcat.*/
+classpath.txt
+jvm_options.txt
+cloudflare.exe
+cloudflared.exe
 
 # IDE & Editor Temporary Files
 .idea/

@@ -71,6 +71,13 @@
             <version>${h2.version}</version>
         </dependency>
 
+        <!-- PostgreSQL JDBC Driver (for Render Cloud Deployment) -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.2</version>
+        </dependency>
+
         <!-- HikariCP Connection Pool -->
         <dependency>
             <groupId>com.zaxxer</groupId>
