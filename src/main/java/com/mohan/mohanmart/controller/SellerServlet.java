@@ -116,7 +116,7 @@ public class SellerServlet extends BaseServlet {
             }
 
             if (uri.contains("/orders") && uri.contains("/status")) {
-                handleUpdateOrderStatus(req, resp, isApi);
+                handleUpdateOrderStatus(req, resp, seller, isApi);
             } else if (uri.contains("/products")) {
                 handleCreateProduct(req, resp, sellerId, isApi);
             } else {
@@ -137,7 +137,7 @@ public class SellerServlet extends BaseServlet {
             Long sellerId = seller.getId();
 
             if (uri.contains("/orders") && uri.contains("/status")) {
-                handleUpdateOrderStatus(req, resp, isApi);
+                handleUpdateOrderStatus(req, resp, seller, isApi);
             } else if (uri.contains("/products")) {
                 handleUpdateProduct(req, resp, sellerId, isApi);
             } else {
@@ -289,7 +289,7 @@ public class SellerServlet extends BaseServlet {
         }
     }
 
-    private void handleUpdateOrderStatus(HttpServletRequest req, HttpServletResponse resp, boolean isApi)
+    private void handleUpdateOrderStatus(HttpServletRequest req, HttpServletResponse resp, UserResponseDTO seller, boolean isApi)
             throws Exception {
         Long orderId = parseIdFromPath(req.getPathInfo());
         String statusStr = null;
@@ -315,6 +315,11 @@ public class SellerServlet extends BaseServlet {
         }
         if (statusStr == null || statusStr.trim().isEmpty()) {
             throw new ValidationException("New order status is required", "MISSING_STATUS");
+        }
+
+        // Ensure seller owns items in the order (or is ADMIN)
+        if (seller != null && seller.getId() != null) {
+            orderService.getOrderById(orderId, seller.getId(), seller.getRole());
         }
 
         OrderStatus newStatus = OrderStatus.fromString(statusStr);

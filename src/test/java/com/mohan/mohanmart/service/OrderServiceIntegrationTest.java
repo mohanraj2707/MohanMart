@@ -157,4 +157,32 @@ class OrderServiceIntegrationTest extends BaseDAOTest {
 
         assertThrows(OrderException.class, () -> orderService.cancelOrder(order.getId(), buyerId, "BUYER"));
     }
+
+    @Test
+    @DisplayName("Should advance CONFIRMED -> SHIPPED -> DELIVERED and reject invalid transitions with ConflictException")
+    void testOrderStatusWorkflowAndConflictTransitions() throws AppException {
+        cartDAO.add(buyerId, productId1, 1);
+        Order order = orderService.checkout(buyerId);
+        assertEquals(OrderStatus.CONFIRMED, order.getStatus());
+
+        // Reject CONFIRMED -> PENDING backward transition
+        assertThrows(com.mohan.mohanmart.exception.ConflictException.class,
+                () -> orderService.updateOrderStatus(order.getId(), OrderStatus.PENDING));
+
+        // Advance CONFIRMED -> SHIPPED
+        orderService.updateOrderStatus(order.getId(), OrderStatus.SHIPPED);
+        assertEquals(OrderStatus.SHIPPED, orderService.getOrderById(order.getId()).getStatus());
+
+        // Reject SHIPPED -> CONFIRMED backward transition
+        assertThrows(com.mohan.mohanmart.exception.ConflictException.class,
+                () -> orderService.updateOrderStatus(order.getId(), OrderStatus.CONFIRMED));
+
+        // Advance SHIPPED -> DELIVERED
+        orderService.updateOrderStatus(order.getId(), OrderStatus.DELIVERED);
+        assertEquals(OrderStatus.DELIVERED, orderService.getOrderById(order.getId()).getStatus());
+
+        // Reject DELIVERED -> SHIPPED transition
+        assertThrows(com.mohan.mohanmart.exception.ConflictException.class,
+                () -> orderService.updateOrderStatus(order.getId(), OrderStatus.SHIPPED));
+    }
 }

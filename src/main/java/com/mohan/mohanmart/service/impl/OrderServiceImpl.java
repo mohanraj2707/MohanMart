@@ -197,12 +197,19 @@ public class OrderServiceImpl implements OrderService {
         Order existing = getOrderById(orderId);
         OrderStatus current = existing.getStatus();
 
-        // Validate status transition rules
+        // Validate status transition rules (O2: Pending -> Confirmed -> Shipped -> Delivered)
         if (current == OrderStatus.CANCELLED) {
-            throw new OrderException("Cannot change status of a cancelled order");
+            throw new ConflictException("Cannot change status of a cancelled order", "INVALID_STATUS_TRANSITION");
         }
         if (current == OrderStatus.DELIVERED && newStatus != OrderStatus.DELIVERED) {
-            throw new OrderException("Delivered orders cannot be moved to other states");
+            throw new ConflictException("Delivered orders cannot be moved to other states", "INVALID_STATUS_TRANSITION");
+        }
+        if (current == OrderStatus.SHIPPED && (newStatus == OrderStatus.PENDING
+                || newStatus == OrderStatus.CONFIRMED || newStatus == OrderStatus.CANCELLED)) {
+            throw new ConflictException("Invalid order status transition from SHIPPED to " + newStatus, "INVALID_STATUS_TRANSITION");
+        }
+        if (current == OrderStatus.CONFIRMED && newStatus == OrderStatus.PENDING) {
+            throw new ConflictException("Invalid order status transition from CONFIRMED to PENDING", "INVALID_STATUS_TRANSITION");
         }
 
         orderDAO.updateStatus(orderId, newStatus);
