@@ -1,10 +1,6 @@
 name: Build and Verify MohanMart
 
-on:
-  push:
-    branches: [ main, master, "feature/**" ]
-  pull_request:
-    branches: [ main, master ]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -23,3 +19,13 @@ jobs:
 
       - name: Build, Test & Verify with Maven
         run: mvn -B clean verify
+
+      - name: Run Static Analysis (Checkstyle & SpotBugs)
+        run: mvn -B checkstyle:check spotbugs:check
+
+      - name: Upload Packaged WAR Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mohanmart-war
+          path: target/mohanmart.war
+          retention-days: 14
