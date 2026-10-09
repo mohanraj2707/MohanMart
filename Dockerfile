@@ -18,8 +18,10 @@ RUN mvn -B clean package -DskipTests
 # ==========================================================================
 FROM tomcat:9.0-jre17-temurin
 
-# Remove default Tomcat webapps and deploy MohanMart as ROOT context (/)
+# Remove default Tomcat webapps, disable TCP shutdown port 8005 (port="-1") so Render
+# port-scanners/health probes never hit StandardServer, and bind HTTP Connector to 0.0.0.0:${port.http}
 RUN rm -rf /usr/local/tomcat/webapps/* /usr/local/tomcat/webapps.dist \
+    && sed -i 's/<Server port="8005" shutdown="SHUTDOWN">/<Server port="-1" shutdown="SHUTDOWN">/' /usr/local/tomcat/conf/server.xml \
     && sed -i 's/Connector port="8080"/Connector address="0.0.0.0" port="${port.http}"/' /usr/local/tomcat/conf/server.xml \
     && groupadd -r appuser && useradd -r -u 1001 -g appuser appuser \
     && mkdir -p /usr/local/tomcat/logs /usr/local/tomcat/temp /usr/local/tomcat/work

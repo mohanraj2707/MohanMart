@@ -29,6 +29,7 @@ public class TomcatServer {
 
     public static void start(int port) throws Exception {
         tomcat = new Tomcat();
+        tomcat.getServer().setPort(-1); // Disable TCP shutdown port so only HTTP connector listens
         tomcat.setPort(port);
         tomcat.getConnector(); // Triggers default connector initialization
 

@@ -145,4 +145,19 @@ public class TomcatVisualInspectionTest {
         int status = conn.getResponseCode();
         assertTrue(status == 302 || status == 200, "Cart returned unexpected status: " + status);
     }
+
+    @Test
+    @Order(8)
+    @DisplayName("Verify HTTP HEAD health/probe requests on /, /home, and /api/v1/health succeed cleanly")
+    void testRenderHeadProbeRequests() throws Exception {
+        for (String path : new String[]{"/", "/home", "/api/v1/health"}) {
+            URL url = new URL(BASE_URL + path);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("HEAD");
+            conn.setInstanceFollowRedirects(false);
+            int status = conn.getResponseCode();
+            assertTrue(status == 200 || status == 302,
+                    "HEAD probe on " + path + " returned unexpected status: " + status);
+        }
+    }
 }
