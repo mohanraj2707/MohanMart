@@ -1,6 +1,7 @@
 package com.mohan.mohanmart.controller;
 
 import com.mohan.mohanmart.dto.UserResponseDTO;
+import com.mohan.mohanmart.exception.RateLimitException;
 import com.mohan.mohanmart.service.ChatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -50,7 +51,7 @@ class ChatServletTest {
     }
 
     @Test
-    @DisplayName("POST /api/chat with valid message returns AI assistant response")
+    @DisplayName("POST /api/v1/chat with valid message returns AI assistant response in standard envelope")
     void testChatValidMessage() throws Exception {
         when(request.getSession(false)).thenReturn(session);
         UserResponseDTO user = new UserResponseDTO();
@@ -60,18 +61,18 @@ class ChatServletTest {
         String json = "{\"message\":\"What is your return policy?\"}";
         when(request.getReader()).thenReturn(new BufferedReader(new StringReader(json)));
         when(chatService.processMessage(eq("What is your return policy?"), eq(10L)))
-                .thenReturn("We offer a 30-day hassle-free return policy.");
+                .thenReturn("We offer a 7-day hassle-free return policy.");
 
         servlet.doPost(request, response);
 
         verify(response).setStatus(HttpServletResponse.SC_OK);
         String jsonOutput = responseWriter.toString();
         assertTrue(jsonOutput.contains("\"success\":true"));
-        assertTrue(jsonOutput.contains("30-day hassle-free return policy"));
+        assertTrue(jsonOutput.contains("7-day hassle-free return policy"));
     }
 
     @Test
-    @DisplayName("POST /api/chat with empty message returns 400 validation error")
+    @DisplayName("POST /api/v1/chat with empty message returns 400 validation error")
     void testChatEmptyMessageReturns400() throws Exception {
         when(request.getSession(false)).thenReturn(null);
         String json = "{\"message\":\"\"}";
@@ -83,5 +84,39 @@ class ChatServletTest {
         String jsonOutput = responseWriter.toString();
         assertTrue(jsonOutput.contains("\"success\":false"));
         assertTrue(jsonOutput.contains("EMPTY_MESSAGE"));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/chat with message exceeding 500 chars returns 400 validation error")
+    void testChatMessageTooLongReturns400() throws Exception {
+        when(request.getSession(false)).thenReturn(null);
+        String longMsg = "x".repeat(505);
+        String json = "{\"message\":\"" + longMsg + "\"}";
+        when(request.getReader()).thenReturn(new BufferedReader(new StringReader(json)));
+
+        servlet.doPost(request, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        String jsonOutput = responseWriter.toString();
+        assertTrue(jsonOutput.contains("\"success\":false"));
+        assertTrue(jsonOutput.contains("MESSAGE_TOO_LONG"));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/chat when rate limit exceeded returns HTTP 429")
+    void testChatRateLimitedReturns429() throws Exception {
+        when(request.getSession(false)).thenReturn(session);
+        when(session.getId()).thenReturn("sess-123");
+        String json = "{\"message\":\"Hello\"}";
+        when(request.getReader()).thenReturn(new BufferedReader(new StringReader(json)));
+        when(chatService.processMessage(eq("Hello"), eq("session:sess-123")))
+                .thenThrow(new RateLimitException("Rate limit exceeded"));
+
+        servlet.doPost(request, response);
+
+        verify(response).setStatus(429);
+        String jsonOutput = responseWriter.toString();
+        assertTrue(jsonOutput.contains("\"success\":false"));
+        assertTrue(jsonOutput.contains("RATE_LIMIT_EXCEEDED"));
     }
 }

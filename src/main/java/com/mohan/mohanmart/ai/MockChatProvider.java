@@ -73,8 +73,8 @@ public class MockChatProvider implements ChatProvider {
         }
 
         // 10. Contact & Customer Support FAQ
-        if (q.contains("contact") || q.contains("support") || q.contains("help") || q.contains("email")
-                || q.contains("phone") || q.contains("customer service")) {
+        if (q.contains("contact") || q.contains("support") || q.contains("helpdesk") || q.contains("email")
+                || q.contains("phone number") || q.contains("customer service")) {
             return "You can reach MohanMart Customer Support 24/7 at support@mohanmart.com or use this assistant anytime for help with orders, products, and account questions.";
         }
 

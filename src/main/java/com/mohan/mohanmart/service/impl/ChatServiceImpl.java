@@ -127,12 +127,10 @@ public class ChatServiceImpl implements ChatService {
         }
         try {
             String keyword = extractKeyword(userMessage);
-            PaginatedResult<ProductDTO> result = productService.searchProducts(
-                    keyword, null, null, null, true, null, 1, 3);
-            if (result == null || result.getData() == null || result.getData().isEmpty()) {
+            List<ProductDTO> topMatches = productService.searchProducts(keyword, null, 1, 3);
+            if (topMatches == null || topMatches.isEmpty()) {
                 return "";
             }
-            List<ProductDTO> topMatches = result.getData();
             return topMatches.stream()
                     .limit(3)
                     .map(p -> String.format("%s (%s, $%s)", p.getName(), p.getCategory(), p.getPrice()))
