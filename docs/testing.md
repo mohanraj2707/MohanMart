@@ -8,11 +8,11 @@ All automated tests run on **JUnit 5 Jupiter (`5.10.2`)** and **Mockito (`5.11.0
 | :--- | :--- | :---: | :--- |
 | **AI Chatbot (O4)** | `MockChatProviderTest`, `GeminiChatProviderTest`, `ChatServiceTest`, `ChatServletTest` | 27 | 12 FAQ topics, PII redaction, model guard (`gemini-3.1-flash-lite`), 10/min rate limit (HTTP 429), session cache, failover |
 | **DAO Layer (H2 JDBC)** | `UserDAOTest`, `ProductDAOTest`, `CartDAOTest`, `OrderDAOTest`, `ReviewDAOTest`, `DatabaseLayerIntegrationTest` | 29 | CRUD, FK constraints, unique email/review constraints, atomic stock updates, `DELIVERED` purchase check |
-| **Service Layer** | `AuthServiceTest`, `UserServiceTest`, `ProductServiceTest`, `CartServiceTest`, `OrderServiceIntegrationTest`, `ReviewServiceTest` | 32 | Validation, 10-step ACID checkout commit & rollback, O2 status workflow (`409 Conflict`), verified review rules |
-| **Controller & Filter Layer** | `AdminServletTest`, `CartServletTest`, `OrderServletTest`, `ProductServletTest`, `ReviewServletTest`, `SellerServletTest`, `HealthServletTest`, `AuthFilterTest`, `CsrfFilterTest` | 30 | JSON envelopes, HTTP status codes (`200`, `201`, `400`, `401`, `403`, `404`, `409`, `429`, `503`), RBAC, CSRF |
+| **Service Layer** | `AuthServiceTest`, `UserServiceTest`, `ProductServiceTest`, `CartServiceTest`, `OrderServiceIntegrationTest`, `ReviewServiceTest` | 38 | Validation, 10-step ACID checkout commit & rollback, O2 status workflow (`409 Conflict`), cart IDOR protection, verified review rules |
+| **Controller & Filter Layer** | `AdminServletTest`, `CartServletTest`, `OrderServletTest`, `ProductServletTest`, `ReviewServletTest`, `SellerServletTest`, `HealthServletTest`, `AuthFilterTest`, `CsrfFilterTest` | 33 | JSON envelopes, HTTP status codes (`200`, `201`, `400`, `401`, `403`, `404`, `409`, `429`, `503`), RBAC, CSRF |
 | **Model, DTO, Exception & Util** | `ModelTest`, `DtoTest`, `ExceptionTest`, `DatabaseMigrationRunnerTest`, `PasswordUtilTest`, `SecurityUtilTest`, `ValidationUtilTest` | 21 | BCrypt cost 12 hashing, CSRF token generation/verification, input validators, V1–V4 idempotent SQL migrations |
 | **Embedded Tomcat 9 E2E** | `EndToEndBusinessFlowsTest`, `ProductAndCartFlowTest`, `TomcatVisualInspectionTest` | 32 | Full HTTP cookie/CSRF flows across Buyer, Seller, and Admin + JSP compilation & CSS/JS asset serving |
-| **Total** | **29 Test Classes** | **171+ Tests** | **0 Failures, 0 Errors** |
+| **Total** | **29 Test Classes** | **180 Tests** | **0 Failures, 0 Errors** |
 
 ---
 
@@ -29,6 +29,8 @@ All automated tests run on **JUnit 5 Jupiter (`5.10.2`)** and **Mockito (`5.11.0
 | **S-07** | **Custom Error Pages (No Stack Traces)**: `400`, `403`, `404`, `500`, and `java.lang.Throwable` mapped in `web.xml` to clean JSP views with zero stack trace leakage. | Verified in `src/main/webapp/WEB-INF/web.xml` and `src/main/webapp/WEB-INF/views/error/*.jsp`. | **PASS** |
 | **S-08** | **Zero Committed Secrets**: `.env` and `config.properties` gitignored; `GEMINI_API_KEY` read strictly from environment variables on the server. | Verified in `.gitignore`, `.env.example`, and `GeminiChatProvider.java`. | **PASS** |
 | **S-09** | **Chatbot Abuse & Privacy Guards**: Input capped at 500 chars (`400`), rate-limited to 10 messages/min per session (`429`), PII stripped before external call. | Verified in `ChatServiceImpl.java`, `GeminiChatProvider.java`, `ChatServiceTest`, and `ChatServletTest`. | **PASS** |
+| **S-10** | **IDOR Prevention (Cart, Orders & Products)**: Buyers can only modify/remove own cart items and view/cancel own orders; Sellers can only edit/delete own products and advance orders containing their items. | Verified in `CartServiceImpl.java`, `OrderServiceImpl.java`, `ProductServiceImpl.java`, `SellerServlet.java`, `CartServiceTest`, and `SellerServletTest`. | **PASS** |
+| **S-11** | **Open Redirect Prevention**: Login `redirect` parameter validated to allow only relative application paths (`startsWith("/") && !startsWith("//")`). | Verified in `AuthServlet.resolveSafeRedirect`. | **PASS** |
 
 ---
 

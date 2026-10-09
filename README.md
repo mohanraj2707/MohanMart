@@ -29,7 +29,7 @@ In addition, **MohanMart** includes an integrated, privacy-preserving **AI Marke
 | **Security** | jBCrypt 0.4 + Custom Filters | Salted BCrypt (cost 12), `AuthFilter` RBAC, `CsrfFilter`, `<c:out>` XSS defense |
 | **AI Assistant (O4)** | `GeminiChatProvider` / `MockChatProvider` | `gemini-3.1-flash-lite` via REST + 10 msg/min session rate limiter & cache |
 | **Logging & Tracing** | SLF4J 2.0.12 + Logback 1.5.3 | Structured logging with `RequestIdFilter` UUID in MDC (`%X{requestId}`) |
-| **Testing** | JUnit 5 Jupiter 5.10.2 + Mockito 5.11.0 | 176+ unit, DAO, service, controller, filter, and embedded Tomcat E2E tests |
+| **Testing** | JUnit 5 Jupiter 5.10.2 + Mockito 5.11.0 | 180 unit, DAO, service, controller, filter, and embedded Tomcat E2E tests |
 | **CI / CD** | GitHub Actions + Docker | Automated `mvn -B clean verify`, static analysis, WAR artifact, and Render `Dockerfile` |
 
 ---
@@ -85,7 +85,7 @@ cd MohanMart
 # 2. Configure local properties (optional - defaults to embedded H2)
 cp src/main/resources/config.properties.example src/main/resources/config.properties
 
-# 3. Run full build, migrations, and all 176+ automated JUnit 5 tests
+# 3. Run full build, migrations, and all 180 automated JUnit 5 tests
 mvn -B clean verify
 
 # 4. Run static analysis (Checkstyle & SpotBugs)
