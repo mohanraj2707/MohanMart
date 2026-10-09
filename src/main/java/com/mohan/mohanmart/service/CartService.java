@@ -49,12 +49,35 @@ public interface CartService {
     void updateQuantity(Long cartItemId, int quantity) throws AppException;
 
     /**
+     * Updates the quantity of a cart item after verifying ownership by the specified user.
+     *
+     * @param userId     Authenticated buyer ID
+     * @param cartItemId Cart item ID
+     * @param quantity   New quantity
+     * @throws AppException if stock is insufficient or item belongs to another user
+     */
+    default void updateQuantity(Long userId, Long cartItemId, int quantity) throws AppException {
+        updateQuantity(cartItemId, quantity);
+    }
+
+    /**
      * Removes an item from the cart.
      *
      * @param cartItemId Cart item ID
      * @throws AppException if operation fails
      */
     void removeFromCart(Long cartItemId) throws AppException;
+
+    /**
+     * Removes an item from the cart after verifying ownership by the specified user.
+     *
+     * @param userId     Authenticated buyer ID
+     * @param cartItemId Cart item ID
+     * @throws AppException if item belongs to another user or operation fails
+     */
+    default void removeFromCart(Long userId, Long cartItemId) throws AppException {
+        removeFromCart(cartItemId);
+    }
 
     /**
      * Empties the user's cart.

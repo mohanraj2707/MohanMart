@@ -40,7 +40,16 @@ public class AppContextListener implements ServletContextListener {
 
             String jdbcUrl = System.getenv("JDBC_URL");
             if (jdbcUrl == null || jdbcUrl.trim().isEmpty()) {
-                jdbcUrl = props.getProperty("db.url", "jdbc:h2:mem:mohanmart;DB_CLOSE_DELAY=-1;MODE=PostgreSQL");
+                String renderDbUrl = System.getenv("DATABASE_URL");
+                if (renderDbUrl != null && !renderDbUrl.trim().isEmpty()) {
+                    jdbcUrl = renderDbUrl.startsWith("postgres://")
+                            ? renderDbUrl.replaceFirst("^postgres://", "jdbc:postgresql://")
+                            : (renderDbUrl.startsWith("postgresql://")
+                                ? renderDbUrl.replaceFirst("^postgresql://", "jdbc:postgresql://")
+                                : renderDbUrl);
+                } else {
+                    jdbcUrl = props.getProperty("db.url", "jdbc:h2:mem:mohanmart;DB_CLOSE_DELAY=-1;MODE=PostgreSQL");
+                }
             }
 
             String jdbcUser = System.getenv("JDBC_USER");
@@ -53,7 +62,14 @@ public class AppContextListener implements ServletContextListener {
                 jdbcPassword = props.getProperty("db.password", "");
             }
 
-            String driverClassName = props.getProperty("db.driver", "org.h2.Driver");
+            String driverClassName = System.getenv("JDBC_DRIVER");
+            if (driverClassName == null || driverClassName.trim().isEmpty()) {
+                if (jdbcUrl.startsWith("jdbc:postgresql:")) {
+                    driverClassName = "org.postgresql.Driver";
+                } else {
+                    driverClassName = props.getProperty("db.driver", "org.h2.Driver");
+                }
+            }
 
             HikariConfig config = new HikariConfig();
             config.setDriverClassName(driverClassName);
@@ -77,19 +93,21 @@ public class AppContextListener implements ServletContextListener {
             DatabaseMigrationRunner migrationRunner = new DatabaseMigrationRunner(dataSource);
             migrationRunner.runMigrations();
 
-            // Start H2 Web Console on port 8082 and TCP Server on 9092 for database administration
-            try {
-                h2WebServer = org.h2.tools.Server.createWebServer("-web", "-webAllowOthers", "-webPort", "8082").start();
-                logger.info(">>> H2 Web Console started at: http://localhost:8082 (connect to {})", jdbcUrl);
-            } catch (Exception e) {
-                logger.warn("Could not start H2 Web Console on port 8082: {}", e.getMessage());
-            }
+            // Start H2 Web Console on port 8082 and TCP Server on 9092 when running on H2
+            if (jdbcUrl.startsWith("jdbc:h2:")) {
+                try {
+                    h2WebServer = org.h2.tools.Server.createWebServer("-web", "-webAllowOthers", "-webPort", "8082").start();
+                    logger.info(">>> H2 Web Console started at: http://localhost:8082 (connect to {})", jdbcUrl);
+                } catch (Exception e) {
+                    logger.warn("Could not start H2 Web Console on port 8082: {}", e.getMessage());
+                }
 
-            try {
-                h2TcpServer = org.h2.tools.Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort", "9092").start();
-                logger.info(">>> H2 TCP Server started on port 9092");
-            } catch (Exception e) {
-                logger.warn("Could not start H2 TCP Server on port 9092: {}", e.getMessage());
+                try {
+                    h2TcpServer = org.h2.tools.Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort", "9092").start();
+                    logger.info(">>> H2 TCP Server started on port 9092");
+                } catch (Exception e) {
+                    logger.warn("Could not start H2 TCP Server on port 9092: {}", e.getMessage());
+                }
             }
 
         } catch (Exception e) {

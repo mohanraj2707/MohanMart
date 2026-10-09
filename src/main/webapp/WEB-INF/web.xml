@@ -39,4 +39,42 @@
         <error-code>500</error-code>
         <location>/WEB-INF/views/error/500.jsp</location>
     </error-page>
+    <error-page>
+        <exception-type>java.lang.Throwable</exception-type>
+        <location>/WEB-INF/views/error/500.jsp</location>
+    </error-page>
+
+    <!-- Direct Error Route Mappings for Redirects (e.g. AuthFilter /error/403) -->
+    <servlet>
+        <servlet-name>Error400View</servlet-name>
+        <jsp-file>/WEB-INF/views/error/400.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Error400View</servlet-name>
+        <url-pattern>/error/400</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>Error403View</servlet-name>
+        <jsp-file>/WEB-INF/views/error/403.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Error403View</servlet-name>
+        <url-pattern>/error/403</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>Error404View</servlet-name>
+        <jsp-file>/WEB-INF/views/error/404.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Error404View</servlet-name>
+        <url-pattern>/error/404</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>Error500View</servlet-name>
+        <jsp-file>/WEB-INF/views/error/500.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Error500View</servlet-name>
+        <url-pattern>/error/500</url-pattern>
+    </servlet-mapping>
 </web-app>

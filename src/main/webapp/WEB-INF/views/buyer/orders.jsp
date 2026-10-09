@@ -64,6 +64,9 @@
                                         <c:when test="${o.status == 'SHIPPED'}">
                                             <span class="badge badge-gold">In Transit (Shipped)</span>
                                         </c:when>
+                                        <c:when test="${o.status == 'CONFIRMED'}">
+                                            <span class="badge badge-in-stock">Confirmed</span>
+                                        </c:when>
                                         <c:when test="${o.status == 'CANCELLED'}">
                                             <span class="badge badge-out-of-stock">Cancelled</span>
                                         </c:when>
@@ -77,11 +80,11 @@
                                         <a href="${pageContext.request.contextPath}/orders?id=${o.id}" class="btn btn-outline btn-sm">
                                             View Details
                                         </a>
-                                        <c:if test="${o.status == 'PENDING'}">
+                                        <c:if test="${o.status == 'PENDING' || o.status == 'CONFIRMED'}">
                                             <form action="${pageContext.request.contextPath}/orders" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you wish to cancel order #${o.id}?');">
-                                                <input type="hidden" name="_csrf" value="${csrfToken}">
+                                                <input type="hidden" name="_csrf" value="<c:out value='${csrfToken}' />">
                                                 <input type="hidden" name="action" value="cancel">
-                                                <input type="hidden" name="orderId" value="${o.id}">
+                                                <input type="hidden" name="orderId" value="<c:out value='${o.id}' />">
                                                 <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
                                             </form>
                                         </c:if>

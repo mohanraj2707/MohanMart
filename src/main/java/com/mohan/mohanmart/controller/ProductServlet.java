@@ -230,7 +230,7 @@ public class ProductServlet extends BaseServlet {
             if (productId != null) {
                 dto.setId(productId);
             }
-            dto.setSellerId(user.getId());
+            dto.setSellerId("ADMIN".equalsIgnoreCase(user.getRole()) ? null : user.getId());
 
             productService.updateProduct(dto);
             writeJsonResponse(resp, HttpServletResponse.SC_OK, "Product updated successfully", dto);
@@ -255,7 +255,8 @@ public class ProductServlet extends BaseServlet {
                 throw new ValidationException("productId", "Product ID must be provided in URL path");
             }
 
-            productService.deleteProduct(productId, user.getId());
+            Long effectiveSellerId = "ADMIN".equalsIgnoreCase(user.getRole()) ? null : user.getId();
+            productService.deleteProduct(productId, effectiveSellerId);
             writeJsonResponse(resp, HttpServletResponse.SC_OK, "Product deleted successfully", null);
         } catch (Exception e) {
             handleException(resp, e, isApi);

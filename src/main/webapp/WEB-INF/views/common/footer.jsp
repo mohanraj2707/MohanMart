@@ -7,7 +7,7 @@
         <div class="container footer-grid">
             <div class="footer-col">
                 <div class="brand-logo" style="margin-bottom: var(--space-4);">
-                    <div class="brand-symbol" style="background-color: var(--color-accent); color: #ffffff;">P</div>
+                    <div class="brand-symbol" style="background-color: var(--color-accent); color: #ffffff;">M</div>
                     <span class="brand-name" style="color: #ffffff;">Mohan<span style="color: var(--color-accent);">Mart</span></span>
                 </div>
                 <p style="color: #94a3b8; font-size: 0.875rem; line-height: 1.6;">
@@ -56,5 +56,6 @@
 <div id="global-loader"></div>
 
 <script src="${pageContext.request.contextPath}/assets/js/main.js"></script>
+<script src="${pageContext.request.contextPath}/js/chat-widget.js"></script>
 </body>
 </html>

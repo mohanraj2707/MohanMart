@@ -125,4 +125,23 @@ class AdminServletTest {
         verify(response).setStatus(HttpServletResponse.SC_FORBIDDEN);
         assertTrue(responseWriter.toString().contains("ACCESS_DENIED"));
     }
+
+    @Test
+    @DisplayName("DELETE /api/admin/products/10 removes product for admin moderation")
+    void testAdminDeleteProductApi() throws Exception {
+        when(request.getRequestURI()).thenReturn("/mohanmart/api/admin/products/10");
+        when(request.getPathInfo()).thenReturn("/products/10");
+        when(request.getSession(false)).thenReturn(session);
+
+        UserResponseDTO admin = new UserResponseDTO();
+        admin.setId(1L);
+        admin.setRole("ADMIN");
+        when(session.getAttribute("currentUser")).thenReturn(admin);
+
+        servlet.doDelete(request, response);
+
+        verify(productService).deleteProduct(eq(10L), isNull());
+        verify(response).setStatus(HttpServletResponse.SC_OK);
+        assertTrue(responseWriter.toString().contains("\"success\":true"));
+    }
 }

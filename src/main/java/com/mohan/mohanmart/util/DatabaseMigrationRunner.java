@@ -73,16 +73,16 @@ public class DatabaseMigrationRunner {
                    + "version VARCHAR(100) PRIMARY KEY, "
                    + "applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL"
                    + ")";
-        try (Statement stmt = conn.createStatement()) {
-            stmt.execute(sql);
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.execute();
         }
     }
 
     private List<String> getAppliedMigrations(Connection conn) throws SQLException {
         List<String> list = new ArrayList<>();
         String sql = "SELECT version FROM schema_migrations ORDER BY version ASC";
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 list.add(rs.getString("version"));
             }
@@ -109,6 +109,8 @@ public class DatabaseMigrationRunner {
         // 2. Known default migrations fallback
         list.add("V1__init_schema.sql");
         list.add("V2__initial_seed.sql");
+        list.add("V3__add_fk_indexes.sql");
+        list.add("V4__add_order_status_check.sql");
         return list;
     }
 

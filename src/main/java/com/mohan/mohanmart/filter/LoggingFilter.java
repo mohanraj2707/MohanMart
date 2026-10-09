@@ -37,12 +37,16 @@ public class LoggingFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        String requestId = httpRequest.getHeader("X-Request-ID");
+        String requestId = httpRequest.getHeader("X-Request-Id");
         if (requestId == null || requestId.trim().isEmpty()) {
-            requestId = UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+            requestId = httpRequest.getHeader("X-Request-ID");
+        }
+        if (requestId == null || requestId.trim().isEmpty()) {
+            requestId = UUID.randomUUID().toString();
         }
 
         MDC.put(REQUEST_ID_KEY, requestId);
+        httpResponse.setHeader("X-Request-Id", requestId);
         httpResponse.setHeader("X-Request-ID", requestId);
 
         long startTime = System.currentTimeMillis();

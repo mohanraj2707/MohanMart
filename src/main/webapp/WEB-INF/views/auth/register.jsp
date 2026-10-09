@@ -6,7 +6,7 @@
 <div class="auth-wrapper" style="min-height: calc(100vh - 350px); display: flex; align-items: center; justify-content: center; padding: var(--space-8) var(--space-4);">
     <div class="card auth-card" style="width: 100%; max-width: 460px; padding: var(--space-8); box-shadow: var(--shadow-lg);">
         <div style="text-align: center; margin-bottom: var(--space-6);">
-            <div class="brand-symbol" style="margin: 0 auto var(--space-3); width: 44px; height: 44px; font-size: 1.5rem;">P</div>
+            <div class="brand-symbol" style="margin: 0 auto var(--space-3); width: 44px; height: 44px; font-size: 1.5rem;">M</div>
             <h1 style="font-size: 1.75rem; margin-bottom: var(--space-1);">Create an Account</h1>
             <p style="font-size: 0.875rem; color: var(--text-muted); margin: 0;">Join MohanMart as a Discerning Buyer or Artisan Seller</p>
         </div>

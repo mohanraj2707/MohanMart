@@ -9,6 +9,7 @@
     <title><c:out value="${pageTitle != null ? pageTitle : 'MohanMart — Curated Classical Marketplace'}" /></title>
     <meta name="description" content="MohanMart - Premium Multi-Seller Marketplace built on Java Servlets, H2, and Tomcat.">
     <meta name="_csrf" content="${csrfToken}">
+    <meta name="context-path" content="${pageContext.request.contextPath}">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/main.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/components.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/layout.css">
@@ -39,7 +40,7 @@
     <div class="container header-inner">
         <!-- Brand Logo -->
         <a href="${pageContext.request.contextPath}/home" class="brand-logo" aria-label="MohanMart Home">
-            <div class="brand-symbol">P</div>
+            <div class="brand-symbol">M</div>
             <span class="brand-name">Mohan<span>Mart</span></span>
         </a>
 

@@ -4,6 +4,7 @@ import com.mohan.mohanmart.dao.CartDAO;
 import com.mohan.mohanmart.dao.ProductDAO;
 import com.mohan.mohanmart.dto.CartItemDTO;
 import com.mohan.mohanmart.exception.AppException;
+import com.mohan.mohanmart.exception.AuthorizationException;
 import com.mohan.mohanmart.exception.InsufficientStockException;
 import com.mohan.mohanmart.exception.ProductNotFoundException;
 import com.mohan.mohanmart.exception.ValidationException;
@@ -112,5 +113,17 @@ class CartServiceTest {
         // Update to 0 removes the item
         cartService.updateQuantity(100L, 0);
         verify(cartDAO).remove(100L);
+    }
+
+    @Test
+    @DisplayName("Should prevent IDOR when user attempts to update or remove another user's cart item")
+    void testPreventCartItemIdor() throws Exception {
+        CartItem cartItem = new CartItem(100L, 1L, 10L, 2);
+        when(cartDAO.findById(100L)).thenReturn(Optional.of(cartItem));
+
+        assertThrows(AuthorizationException.class, () -> cartService.updateQuantity(2L, 100L, 5));
+        assertThrows(AuthorizationException.class, () -> cartService.removeFromCart(2L, 100L));
+        verify(cartDAO, never()).update(anyLong(), anyInt());
+        verify(cartDAO, never()).remove(anyLong());
     }
 }

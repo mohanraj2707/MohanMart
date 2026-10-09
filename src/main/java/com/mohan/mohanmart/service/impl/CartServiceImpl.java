@@ -4,6 +4,7 @@ import com.mohan.mohanmart.dao.CartDAO;
 import com.mohan.mohanmart.dao.ProductDAO;
 import com.mohan.mohanmart.dto.CartItemDTO;
 import com.mohan.mohanmart.exception.AppException;
+import com.mohan.mohanmart.exception.AuthorizationException;
 import com.mohan.mohanmart.exception.InsufficientStockException;
 import com.mohan.mohanmart.exception.ProductNotFoundException;
 import com.mohan.mohanmart.exception.ResourceNotFoundException;
@@ -95,17 +96,26 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void updateQuantity(Long cartItemId, int quantity) throws AppException {
+        updateQuantity(null, cartItemId, quantity);
+    }
+
+    @Override
+    public void updateQuantity(Long userId, Long cartItemId, int quantity) throws AppException {
         if (cartItemId == null || cartItemId <= 0) {
             throw new ValidationException("cartItemId", "Invalid cart item ID");
+        }
+
+        CartItem cartItem = cartDAO.findById(cartItemId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cart item not found"));
+
+        if (userId != null && !cartItem.getUserId().equals(userId)) {
+            throw new AuthorizationException("Unauthorized to modify another user's cart item");
         }
 
         if (quantity <= 0) {
             cartDAO.remove(cartItemId);
             return;
         }
-
-        CartItem cartItem = cartDAO.findById(cartItemId)
-                .orElseThrow(() -> new ResourceNotFoundException("Cart item not found"));
 
         Product product = productDAO.findById(cartItem.getProductId())
                 .orElseThrow(() -> new ProductNotFoundException(cartItem.getProductId()));
@@ -120,8 +130,20 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void removeFromCart(Long cartItemId) throws AppException {
+        removeFromCart(null, cartItemId);
+    }
+
+    @Override
+    public void removeFromCart(Long userId, Long cartItemId) throws AppException {
         if (cartItemId == null || cartItemId <= 0) {
             throw new ValidationException("cartItemId", "Invalid cart item ID");
+        }
+        if (userId != null) {
+            CartItem cartItem = cartDAO.findById(cartItemId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Cart item not found"));
+            if (!cartItem.getUserId().equals(userId)) {
+                throw new AuthorizationException("Unauthorized to remove another user's cart item");
+            }
         }
         cartDAO.remove(cartItemId);
     }

@@ -147,7 +147,7 @@ public class CartServlet extends BaseServlet {
                     quantity = Integer.parseInt(req.getParameter("quantity"));
                 }
 
-                cartService.updateQuantity(cartItemId, quantity);
+                cartService.updateQuantity(user.getId(), cartItemId, quantity);
 
                 if (isApi) {
                     writeJsonResponse(resp, HttpServletResponse.SC_OK, "Cart updated successfully", null);
@@ -173,7 +173,7 @@ public class CartServlet extends BaseServlet {
                     throw new ValidationException("cartItemId", "Cart item ID is required");
                 }
 
-                cartService.removeFromCart(cartItemId);
+                cartService.removeFromCart(user.getId(), cartItemId);
 
                 if (isApi) {
                     writeJsonResponse(resp, HttpServletResponse.SC_OK, "Item removed from cart successfully", null);
