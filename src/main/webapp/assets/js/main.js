@@ -7,9 +7,19 @@
 
 // Global App State & Context
 const MohanMart = {
-    contextPath: window.location.pathname.substring(0, window.location.pathname.indexOf("/", 1)) || "",
+    contextPath: (function () {
+        const meta = document.querySelector('meta[name="context-path"]');
+        if (meta && meta.getAttribute("content") !== null) {
+            return meta.getAttribute("content");
+        }
+        return window.location.pathname.startsWith("/mohanmart") ? "/mohanmart" : "";
+    })(),
     
     init: function () {
+        const meta = document.querySelector('meta[name="context-path"]');
+        if (meta && meta.getAttribute("content") !== null) {
+            this.contextPath = meta.getAttribute("content");
+        }
         this.initMobileNav();
         this.initAutoDismissAlerts();
         this.initQuickAddToCart();
@@ -336,6 +346,43 @@ const MohanMart = {
                 btn.innerHTML = orig;
             }, 8000);
         }
+    },
+
+    // ----------------------------------------------------------------------
+    // Product Gallery Thumbnail Switcher
+    // ----------------------------------------------------------------------
+    initProductGallery: function () {
+        const thumbs = document.querySelectorAll(".product-thumb-img");
+        const mainImg = document.querySelector(".product-gallery-main img");
+        if (!thumbs.length || !mainImg) return;
+        thumbs.forEach(function (thumb) {
+            thumb.addEventListener("click", function () {
+                thumbs.forEach(function (t) { t.classList.remove("active"); });
+                thumb.classList.add("active");
+                if (thumb.src) {
+                    mainImg.src = thumb.src;
+                }
+            });
+        });
+    },
+
+    // ----------------------------------------------------------------------
+    // Seller Edit Product Modal Helper
+    // ----------------------------------------------------------------------
+    openEditProductModal: function (btn) {
+        if (!btn) return;
+        const setVal = function (id, val) {
+            const el = document.getElementById(id);
+            if (el) el.value = val !== undefined && val !== null ? val : "";
+        };
+        setVal("editProdId", btn.getAttribute("data-id"));
+        setVal("editProdName", btn.getAttribute("data-name"));
+        setVal("editProdCategory", btn.getAttribute("data-category") || "Electronics");
+        setVal("editProdPrice", btn.getAttribute("data-price"));
+        setVal("editProdStock", btn.getAttribute("data-stock"));
+        setVal("editProdImage", btn.getAttribute("data-image"));
+        setVal("editProdDesc", btn.getAttribute("data-desc"));
+        this.openModal("editProductModal");
     },
 
     // ----------------------------------------------------------------------

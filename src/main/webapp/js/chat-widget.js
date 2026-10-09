@@ -8,12 +8,15 @@
     "use strict";
 
     function resolveContextPath() {
+        var meta = document.querySelector('meta[name="context-path"]');
+        if (meta && meta.getAttribute("content") !== null) {
+            return meta.getAttribute("content");
+        }
         if (window.MohanMart && typeof window.MohanMart.contextPath === "string") {
             return window.MohanMart.contextPath;
         }
         var path = window.location.pathname || "";
-        var secondSlash = path.indexOf("/", 1);
-        return secondSlash > 0 ? path.substring(0, secondSlash) : "";
+        return path.indexOf("/mohanmart") === 0 ? "/mohanmart" : "";
     }
 
     function getCsrfToken() {
