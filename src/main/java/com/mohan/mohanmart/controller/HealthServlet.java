@@ -19,7 +19,7 @@ import java.util.Map;
  * Health check endpoint verifying service and database pool availability (§18).
  * GET /api/v1/health -> 200 {"status":"UP","db":"UP"} or 503 {"status":"DOWN","db":"DOWN"}.
  */
-@WebServlet(name = "HealthServlet", urlPatterns = {"/api/v1/health", "/api/health"})
+@WebServlet(name = "HealthServlet", urlPatterns = {"/api/v1/health", "/api/health", "/health"})
 public class HealthServlet extends BaseServlet {
 
     private static final Logger logger = LoggerFactory.getLogger(HealthServlet.class);
