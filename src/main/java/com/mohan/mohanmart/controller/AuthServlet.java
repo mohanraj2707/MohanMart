@@ -57,6 +57,13 @@ public class AuthServlet extends BaseServlet {
                 handleLogin(req, resp, isApi);
             } else if ("/register".equals(servletPath) || (isApi && "/register".equals(pathInfo))) {
                 handleRegister(req, resp, isApi);
+            } else if ("/logout".equals(servletPath) || (isApi && "/logout".equals(pathInfo))) {
+                if (isApi) {
+                    authService.logout(req);
+                    writeJsonResponse(resp, HttpServletResponse.SC_OK, "Logged out successfully", null);
+                } else {
+                    handleLogout(req, resp);
+                }
             } else {
                 writeJsonError(resp, HttpServletResponse.SC_NOT_FOUND, "NOT_FOUND", "Endpoint not found");
             }
@@ -92,8 +99,23 @@ public class AuthServlet extends BaseServlet {
         if (isApi) {
             writeJsonResponse(resp, HttpServletResponse.SC_OK, user);
         } else {
-            resp.sendRedirect(req.getContextPath() + "/");
+            String target = resolveSafeRedirect(req, req.getParameter("redirect"));
+            resp.sendRedirect(target);
         }
+    }
+
+    private String resolveSafeRedirect(HttpServletRequest req, String redirectParam) {
+        String contextPath = req.getContextPath() != null ? req.getContextPath() : "";
+        if (redirectParam != null) {
+            String trimmed = redirectParam.trim();
+            if (trimmed.startsWith("/") && !trimmed.startsWith("//") && !trimmed.contains("://") && !trimmed.contains("\\")) {
+                if (!contextPath.isEmpty() && !trimmed.startsWith(contextPath + "/") && !trimmed.equals(contextPath)) {
+                    return contextPath + trimmed;
+                }
+                return trimmed;
+            }
+        }
+        return contextPath + "/";
     }
 
     private void handleRegister(HttpServletRequest req, HttpServletResponse resp, boolean isApi)
