@@ -1,0 +1,32 @@
+# Maven build output
+target/
+*.war
+*.jar
+*.ear
+
+# Local H2 database files & runtime logs
+data/
+*.mv.db
+*.trace.db
+*.lock.db
+*.log
+logs/
+
+# Secrets & local-only configuration
+.env
+.env.*
+!.env.example
+src/main/resources/config.properties
+
+# Git & CI metadata
+.git/
+.gitignore
+.github/
+
+# IDE & OS files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+cloudflared.exe

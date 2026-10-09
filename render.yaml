@@ -1,0 +1,47 @@
+# ==========================================================================
+# Render Blueprint — MohanMart Docker Web Service + Managed PostgreSQL
+# ==========================================================================
+services:
+  - type: web
+    name: mohanmart
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeploy: true
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: PORT
+        value: "8080"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mohanmart-db
+          property: connectionString
+      - key: DB_USERNAME
+        fromDatabase:
+          name: mohanmart-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: mohanmart-db
+          property: password
+      - key: SEED_DATABASE
+        value: "true"
+      - key: H2_CONSOLE_ENABLED
+        value: "false"
+      - key: ADMIN_EMAIL
+        value: "admin@mohanmart.com"
+      - key: ADMIN_INITIAL_PASSWORD
+        generateValue: true
+      - key: AI_CHATBOT_PROVIDER
+        value: "mock"
+      - key: GEMINI_MODEL
+        value: "gemini-3.1-flash-lite"
+      - key: GEMINI_API_KEY
+        sync: false
+
+databases:
+  - name: mohanmart-db
+    databaseName: mohanmart
+    user: mohanmart_user
+    plan: free
