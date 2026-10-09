@@ -114,13 +114,37 @@ public class AdminServlet extends BaseServlet {
             requireAdmin(req);
 
             String methodOverride = req.getParameter("_method");
+            String action = req.getParameter("action");
             if ("PUT".equalsIgnoreCase(methodOverride)) {
                 doPut(req, resp);
+                return;
+            }
+            if ("DELETE".equalsIgnoreCase(methodOverride) || "delete".equalsIgnoreCase(action)) {
+                handleDeleteProduct(req, resp, isApi);
                 return;
             }
 
             if (uri.contains("/orders") && uri.contains("/status")) {
                 handleUpdateOrderStatus(req, resp, isApi);
+            } else if (uri.contains("/products") && uri.contains("/delete")) {
+                handleDeleteProduct(req, resp, isApi);
+            } else {
+                writeJsonError(resp, HttpServletResponse.SC_NOT_FOUND, "NOT_FOUND", "Endpoint not found");
+            }
+        } catch (Exception e) {
+            handleException(resp, e, isApi);
+        }
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String uri = req.getRequestURI();
+        boolean isApi = uri.contains("/api/");
+
+        try {
+            requireAdmin(req);
+            if (uri.contains("/products")) {
+                handleDeleteProduct(req, resp, isApi);
             } else {
                 writeJsonError(resp, HttpServletResponse.SC_NOT_FOUND, "NOT_FOUND", "Endpoint not found");
             }
@@ -144,6 +168,22 @@ public class AdminServlet extends BaseServlet {
             }
         } catch (Exception e) {
             handleException(resp, e, isApi);
+        }
+    }
+
+    private void handleDeleteProduct(HttpServletRequest req, HttpServletResponse resp, boolean isApi) throws Exception {
+        Long productId = parseIdFromPath(req.getPathInfo());
+        if (productId == null && req.getParameter("productId") != null) {
+            productId = Long.parseLong(req.getParameter("productId").trim());
+        }
+        if (productId == null) {
+            throw new ValidationException("Product ID is required for moderation deletion", "MISSING_PRODUCT_ID");
+        }
+        productService.deleteProduct(productId, null);
+        if (isApi) {
+            writeJsonResponse(resp, HttpServletResponse.SC_OK, "Product removed by administrator", null);
+        } else {
+            resp.sendRedirect(req.getContextPath() + "/admin/products?deleted=true");
         }
     }
 
@@ -182,8 +222,8 @@ public class AdminServlet extends BaseServlet {
             if (isApi) {
                 writeJsonResponse(resp, HttpServletResponse.SC_OK, user);
             } else {
-                req.setAttribute("userProfile", user);
-                forwardToJsp(req, resp, "admin/user-detail.jsp");
+                req.setAttribute("users", List.of(user));
+                forwardToJsp(req, resp, "admin/users.jsp");
             }
         } else {
             List<UserResponseDTO> users = userService.getAllUsers();
@@ -227,7 +267,8 @@ public class AdminServlet extends BaseServlet {
                 writeJsonResponse(resp, HttpServletResponse.SC_OK, order);
             } else {
                 req.setAttribute("order", order);
-                forwardToJsp(req, resp, "admin/order-detail.jsp");
+                req.setAttribute("items", orderService.getOrderItems(orderId));
+                forwardToJsp(req, resp, "buyer/order-detail.jsp");
             }
         } else {
             List<Order> orders = orderService.getAllOrders();
@@ -284,7 +325,7 @@ public class AdminServlet extends BaseServlet {
         }
         String[] parts = pathInfo.split("/");
         for (String part : parts) {
-            if (!part.isEmpty() && !"status".equalsIgnoreCase(part)) {
+            if (!part.isEmpty() && !"status".equalsIgnoreCase(part) && !"delete".equalsIgnoreCase(part)) {
                 try {
                     return Long.parseLong(part);
                 } catch (NumberFormatException ignored) {

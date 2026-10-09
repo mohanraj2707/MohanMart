@@ -16,6 +16,12 @@
         <p style="color: var(--text-muted); font-size: 0.9375rem; margin: 0;">Inspect all products published across all artisan merchants</p>
     </div>
 
+    <c:if test="${param.deleted == 'true'}">
+        <div class="alert alert-warning" style="background-color: var(--warning-bg); color: var(--warning-text); border: 1px solid var(--warning-border); padding: var(--space-4); border-radius: var(--radius-sm); margin-bottom: var(--space-6);">
+            <strong>&#10003; Listing Moderated.</strong> The selected product has been removed from the marketplace catalog.
+        </div>
+    </c:if>
+
     <div class="card" style="padding: var(--space-6);">
         <c:choose>
             <c:when test="${not empty productsResult.data}">
@@ -28,7 +34,7 @@
                                 <th>Seller ID</th>
                                 <th>Unit Price</th>
                                 <th>Inventory</th>
-                                <th style="text-align: right;">View</th>
+                                <th style="text-align: right;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -45,7 +51,15 @@
                                     <td><strong style="font-family: var(--font-serif);">$<c:out value="${p.price}" /></strong></td>
                                     <td><span class="badge badge-in-stock"><c:out value="${p.stock}" /> in Stock</span></td>
                                     <td style="text-align: right;">
-                                        <a href="${pageContext.request.contextPath}/product?id=${p.id}" target="_blank" class="btn btn-outline btn-sm">Inspect</a>
+                                        <div style="display: inline-flex; gap: var(--space-2);">
+                                            <a href="${pageContext.request.contextPath}/product?id=${p.id}" target="_blank" class="btn btn-outline btn-sm">Inspect</a>
+                                            <form action="${pageContext.request.contextPath}/admin/products" method="POST" style="display: inline;" onsubmit="return confirm('Remove this product listing from the marketplace?');">
+                                                <input type="hidden" name="_csrf" value="${csrfToken}">
+                                                <input type="hidden" name="action" value="delete">
+                                                <input type="hidden" name="productId" value="${p.id}">
+                                                <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             </c:forEach>

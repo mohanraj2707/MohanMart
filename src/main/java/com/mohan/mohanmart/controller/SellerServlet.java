@@ -166,7 +166,8 @@ public class SellerServlet extends BaseServlet {
                 throw new ValidationException("Product ID is required for deletion", "MISSING_PRODUCT_ID");
             }
 
-            productService.deleteProduct(productId, sellerId);
+            Long effectiveSellerId = Role.ADMIN.name().equalsIgnoreCase(seller.getRole()) ? null : sellerId;
+            productService.deleteProduct(productId, effectiveSellerId);
 
             if (isApi) {
                 writeJsonResponse(resp, HttpServletResponse.SC_OK, "Product deleted successfully", null);
@@ -260,26 +261,33 @@ public class SellerServlet extends BaseServlet {
 
     private void handleUpdateProduct(HttpServletRequest req, HttpServletResponse resp, Long sellerId, boolean isApi)
             throws Exception {
+        UserResponseDTO seller = getSessionUser(req);
         ProductDTO dto = readJsonBody(req, ProductDTO.class);
+        Long pathId = parseIdFromPath(req.getPathInfo());
         if (dto == null) {
             dto = new ProductDTO();
-            Long id = parseIdFromPath(req.getPathInfo());
-            if (id == null && req.getParameter("id") != null) {
+            Long id = pathId;
+            if (id == null && req.getParameter("id") != null && !req.getParameter("id").trim().isEmpty()) {
                 id = Long.parseLong(req.getParameter("id").trim());
+            } else if (id == null && req.getParameter("productId") != null && !req.getParameter("productId").trim().isEmpty()) {
+                id = Long.parseLong(req.getParameter("productId").trim());
             }
             dto.setId(id);
             dto.setName(req.getParameter("name"));
             dto.setDescription(req.getParameter("description"));
             dto.setCategory(req.getParameter("category"));
             dto.setImageUrl(req.getParameter("imageUrl"));
-            if (req.getParameter("price") != null) {
+            if (req.getParameter("price") != null && !req.getParameter("price").trim().isEmpty()) {
                 dto.setPrice(new BigDecimal(req.getParameter("price").trim()));
             }
-            if (req.getParameter("stock") != null) {
+            if (req.getParameter("stock") != null && !req.getParameter("stock").trim().isEmpty()) {
                 dto.setStock(Integer.parseInt(req.getParameter("stock").trim()));
             }
+        } else if (dto.getId() == null && pathId != null) {
+            dto.setId(pathId);
         }
-        dto.setSellerId(sellerId);
+        boolean isAdmin = seller != null && Role.ADMIN.name().equalsIgnoreCase(seller.getRole());
+        dto.setSellerId(isAdmin ? null : sellerId);
 
         productService.updateProduct(dto);
         if (isApi) {

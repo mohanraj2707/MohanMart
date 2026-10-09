@@ -88,12 +88,26 @@
                                         </c:choose>
                                     </td>
                                     <td style="text-align: right;">
-                                        <form action="${pageContext.request.contextPath}/seller/products" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you wish to delete this creation?');">
-                                            <input type="hidden" name="_csrf" value="${csrfToken}">
-                                            <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="productId" value="${p.id}">
-                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                        </form>
+                                        <div style="display: inline-flex; gap: var(--space-2);">
+                                            <button type="button"
+                                                    class="btn btn-outline btn-sm"
+                                                    data-id="<c:out value='${p.id}' />"
+                                                    data-name="<c:out value='${p.name}' />"
+                                                    data-category="<c:out value='${p.category}' />"
+                                                    data-price="<c:out value='${p.price}' />"
+                                                    data-stock="<c:out value='${p.stock}' />"
+                                                    data-image="<c:out value='${p.imageUrl}' />"
+                                                    data-desc="<c:out value='${p.description}' />"
+                                                    onclick="MohanMart.openEditProductModal(this)">
+                                                Edit
+                                            </button>
+                                            <form action="${pageContext.request.contextPath}/seller/products" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you wish to delete this creation?');">
+                                                <input type="hidden" name="_csrf" value="${csrfToken}">
+                                                <input type="hidden" name="action" value="delete">
+                                                <input type="hidden" name="productId" value="${p.id}">
+                                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             </c:forEach>
@@ -163,6 +177,63 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="MohanMart.closeModal('addProductModal')">Cancel</button>
                 <button type="submit" class="btn btn-primary submit-btn">Publish Listing &rarr;</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Dialog: Edit Existing Product -->
+<div id="editProductModal" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 560px;">
+        <div class="modal-header">
+            <h3 class="modal-title">Edit Catalog Creation</h3>
+            <button type="button" class="modal-close" onclick="MohanMart.closeModal('editProductModal')">&times;</button>
+        </div>
+        <form action="${pageContext.request.contextPath}/seller/products" method="POST" onsubmit="MohanMart.showFormLoading(this)">
+            <input type="hidden" name="_csrf" value="${csrfToken}">
+            <input type="hidden" name="action" value="update">
+            <input type="hidden" id="editProdId" name="id" value="">
+            <div class="modal-body" style="padding: var(--space-6);">
+                <div class="form-group">
+                    <label for="editProdName" class="form-label">Creation Title <span class="required">*</span></label>
+                    <input type="text" id="editProdName" name="name" class="form-control" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                    <div class="form-group">
+                        <label for="editProdCategory" class="form-label">Category <span class="required">*</span></label>
+                        <select id="editProdCategory" name="category" class="form-select" required>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Books">Books</option>
+                            <option value="Clothing">Clothing</option>
+                            <option value="Home">Home &amp; Kitchen</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editProdPrice" class="form-label">Price ($ USD) <span class="required">*</span></label>
+                        <input type="number" id="editProdPrice" name="price" class="form-control" min="0.01" step="0.01" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="editProdStock" class="form-label">Inventory Quantity <span class="required">*</span></label>
+                    <input type="number" id="editProdStock" name="stock" class="form-control" min="0" step="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="editProdImage" class="form-label">Image URL</label>
+                    <input type="url" id="editProdImage" name="imageUrl" class="form-control">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="editProdDesc" class="form-label">Detailed Description <span class="required">*</span></label>
+                    <textarea id="editProdDesc" name="description" class="form-control" rows="3" required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="MohanMart.closeModal('editProductModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary submit-btn">Save Changes &rarr;</button>
             </div>
         </form>
     </div>
