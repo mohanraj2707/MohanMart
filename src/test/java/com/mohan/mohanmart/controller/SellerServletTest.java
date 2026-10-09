@@ -125,4 +125,27 @@ class SellerServletTest {
         verify(response).setStatus(HttpServletResponse.SC_FORBIDDEN);
         assertTrue(responseWriter.toString().contains("ACCESS_DENIED"));
     }
+
+    @Test
+    @DisplayName("POST /api/seller/orders/status with invalid transition returns 409 Conflict")
+    void testInvalidOrderStatusTransitionReturns409() throws Exception {
+        when(request.getRequestURI()).thenReturn("/mohanmart/api/seller/orders/100/status");
+        when(request.getPathInfo()).thenReturn("/100/status");
+        when(request.getSession(false)).thenReturn(session);
+
+        UserResponseDTO seller = new UserResponseDTO();
+        seller.setId(4L);
+        seller.setRole("SELLER");
+        when(session.getAttribute("currentUser")).thenReturn(seller);
+
+        String json = "{\"status\":\"PENDING\"}";
+        when(request.getReader()).thenReturn(new BufferedReader(new StringReader(json)));
+        doThrow(new com.mohan.mohanmart.exception.ConflictException("Invalid transition", "INVALID_STATUS_TRANSITION"))
+                .when(orderService).updateOrderStatus(eq(100L), eq(OrderStatus.PENDING));
+
+        servlet.doPost(request, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_CONFLICT);
+        assertTrue(responseWriter.toString().contains("INVALID_STATUS_TRANSITION"));
+    }
 }
