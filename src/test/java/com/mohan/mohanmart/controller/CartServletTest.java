@@ -98,7 +98,28 @@ class CartServletTest {
     }
 
     @Test
-    @DisplayName("POST /api/cart/remove removes item from cart")
+    @DisplayName("POST /api/cart/update updates item quantity for authenticated user")
+    void testUpdateCartQuantityApi() throws Exception {
+        when(request.getServletPath()).thenReturn("/api/cart/update");
+        when(request.getPathInfo()).thenReturn(null);
+        when(request.getSession(false)).thenReturn(session);
+
+        UserResponseDTO user = new UserResponseDTO();
+        user.setId(3L);
+        when(session.getAttribute("currentUser")).thenReturn(user);
+
+        String json = "{\"cartItemId\":10,\"quantity\":4}";
+        when(request.getReader()).thenReturn(new BufferedReader(new StringReader(json)));
+
+        servlet.doPost(request, response);
+
+        verify(cartService).updateQuantity(eq(3L), eq(10L), eq(4));
+        verify(response).setStatus(HttpServletResponse.SC_OK);
+        assertTrue(responseWriter.toString().contains("\"success\":true"));
+    }
+
+    @Test
+    @DisplayName("POST /api/cart/remove removes item from cart for authenticated user")
     void testRemoveFromCartApi() throws Exception {
         when(request.getServletPath()).thenReturn("/api/cart/remove");
         when(request.getPathInfo()).thenReturn(null);
@@ -113,7 +134,7 @@ class CartServletTest {
 
         servlet.doPost(request, response);
 
-        verify(cartService).removeFromCart(eq(10L));
+        verify(cartService).removeFromCart(eq(3L), eq(10L));
         verify(response).setStatus(HttpServletResponse.SC_OK);
         assertTrue(responseWriter.toString().contains("\"success\":true"));
     }
